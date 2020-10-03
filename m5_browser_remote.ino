@@ -16,9 +16,12 @@
 //const char* ssid = "........";
 //const char* password = "........";
 
+#define BTN_A_PIN 37
 #define LED_PIN 10//このLEDは電位を下げることで発光する
 #define LED_ON  LOW
 #define LED_OFF HIGH
+#define BTN_ON  LOW
+#define BTN_OFF HIGH
 
 WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
@@ -33,8 +36,12 @@ void drv8830_fwd(void);
 void drv8830_rv(void);
 void drv8830_neutral(void);
 
+uint8_t prev_btn_a = BTN_OFF;
+uint8_t btn_a      = BTN_OFF;
+
 void setup(void) {
   pinMode(LED_PIN,OUTPUT);
+  pinMode(BTN_A_PIN,INPUT_PULLUP);
   digitalWrite(LED_PIN,LED_OFF);
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
@@ -80,6 +87,15 @@ void setup(void) {
 void loop(void) {
   webSocket.loop();
   server.handleClient();
+
+  btn_a = digitalRead(BTN_A_PIN);
+  if(prev_btn_a == BTN_OFF && btn_a == BTN_ON){
+    drv8830_neutral();
+    digitalWrite(LED_PIN,LED_ON);
+    delay(100);
+    digitalWrite(LED_PIN,LED_OFF);
+  }
+  prev_btn_a = btn_a;
 }
 
 void handleRoot(void) {
@@ -115,6 +131,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
   switch(type) {
     case WStype_DISCONNECTED:{
        Serial.printf("[%u] Disconnected!\n", num);
+       drv8830_neutral();
        break;
     }
     case WStype_CONNECTED:{

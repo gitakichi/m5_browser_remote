@@ -20,6 +20,11 @@ const char index_str[] = R"=====(
       <th><input type="button" value="E" onmousedown="cmmd_E();" onmouseup="cmmd_N();"/></th>
     </tr>
     <tr>
+      <th></th>
+      <th><input type="button" value="N" onmouseup="cmmd_N();"/></th>
+      <th></th>
+    </tr>
+    <tr>
       <th><input type="button" value="A" onmousedown="cmmd_A();" onmouseup="cmmd_N();"/></th>
       <th><input type="button" value="S" onmousedown="cmmd_S();" onmouseup="cmmd_N();"/></th>
       <th><input type="button" value="D" onmousedown="cmmd_D();" onmouseup="cmmd_N();"/></th>
@@ -70,6 +75,7 @@ const char index_str[] = R"=====(
 		    else if (keyName === 'a') 	cmmd_A();
 		    else if (keyName === 's') 	cmmd_S();
 		    else if (keyName === 'd') 	cmmd_D();
+        else if (keyName === 'n')   cmmd_N();
 		}
     });
     
