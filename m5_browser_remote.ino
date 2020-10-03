@@ -1,13 +1,10 @@
 #include <WiFi.h>
-#include <WiFiClient.h>
 #include <WebServer.h>
 #include <ESPmDNS.h>
 #include <M5StickC.h>
 #include "secret.h"
 #include "index.h"
 
-#include <WiFiMulti.h>
-#include <WiFiClientSecure.h>
 #include <WebSocketsServer.h>
 
 //Wifi認証情報はsecret.hに記載
@@ -19,13 +16,12 @@
 #define LED_OFF HIGH
 
 WebServer server(80);
-// Websocketサーバー 192.68.4.1:81
-WiFiMulti WiFiMulti;
-WebSocketsServer webSocket = WebSocketsServer(81); // 81番ポート
+WebSocketsServer webSocket = WebSocketsServer(81);
+//環境設定->コンパイラの警告->初期値
 
 void handleRoot() {
   digitalWrite(LED_PIN,LED_ON);
-  server.send(200, "text/plain", "hello from esp8266!");
+  server.send(200, "text/plain", "hello from M5StickC!");
   digitalWrite(LED_PIN,LED_OFF);
 }
 
@@ -76,18 +72,12 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
             // send data to all connected clients
             // webSocket.broadcastTXT("message here");
             break;
-        case WStype_BIN:
-            Serial.printf("[%u] get binary length: %u\n", num, length);
-            //hexdump(payload, length);
-
-            // send message to client
-            // webSocket.sendBIN(num, payload, length);
-            break;
-    case WStype_ERROR:      
-    case WStype_FRAGMENT_TEXT_START:
-    case WStype_FRAGMENT_BIN_START:
-    case WStype_FRAGMENT:
-    case WStype_FRAGMENT_FIN:
+      case WStype_BIN:
+      case WStype_ERROR:      
+      case WStype_FRAGMENT_TEXT_START:
+      case WStype_FRAGMENT_BIN_START:
+      case WStype_FRAGMENT:
+      case WStype_FRAGMENT_FIN:
       break;
     }
 
