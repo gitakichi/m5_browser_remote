@@ -6,28 +6,37 @@
 #include "secret.h"
 #include "index.h"
 
-// このLEDは、GPIO10の電位を下げることで発光するタイプ
+#include <WiFiMulti.h>
+#include <WiFiClientSecure.h>
+#include <WebSocketsServer.h>
+
+//Wifi認証情報はsecret.hに記載
+//const char* ssid = "........";
+//const char* password = "........";
+
+#define LED_PIN 10//このLEDは電位を下げることで発光する
 #define LED_ON  LOW
 #define LED_OFF HIGH
 
 WebServer server(80);
-
-const int led = 10;//edit
+// Websocketサーバー 192.68.4.1:81
+WiFiMulti WiFiMulti;
+WebSocketsServer webSocket = WebSocketsServer(81); // 81番ポート
 
 void handleRoot() {
-  digitalWrite(led, LED_ON);
+  digitalWrite(LED_PIN,LED_ON);
   server.send(200, "text/plain", "hello from esp8266!");
-  digitalWrite(led, LED_OFF);
+  digitalWrite(LED_PIN,LED_OFF);
 }
 
 void handleRC() {
-  digitalWrite(led, LED_ON);
+  digitalWrite(LED_PIN,LED_ON);
   server.send(200, "text/HTML", index_str);
-  digitalWrite(led, LED_OFF);
+  digitalWrite(LED_PIN,LED_OFF);
 }
 
 void handleNotFound() {
-  digitalWrite(led, LED_ON);
+  digitalWrite(LED_PIN,LED_ON);
   String message = "File Not Found\n\n";
   message += "URI: ";
   message += server.uri();
@@ -40,12 +49,53 @@ void handleNotFound() {
     message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
   server.send(404, "text/plain", message);
-  digitalWrite(led, LED_OFF);
+  digitalWrite(LED_PIN,LED_OFF);
+}
+
+void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
+
+    switch(type) {
+        case WStype_DISCONNECTED:
+            Serial.printf("[%u] Disconnected!\n", num);
+            break;
+        case WStype_CONNECTED:
+            {
+                IPAddress ip = webSocket.remoteIP(num);
+                Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
+
+        // send message to client
+        webSocket.sendTXT(num, "Connected");
+            }
+            break;
+        case WStype_TEXT://ここでデバッグする
+            Serial.printf("[%u] get Text: %s\n", num, payload);
+
+            // send message to client
+            // webSocket.sendTXT(num, "message here");
+
+            // send data to all connected clients
+            // webSocket.broadcastTXT("message here");
+            break;
+        case WStype_BIN:
+            Serial.printf("[%u] get binary length: %u\n", num, length);
+            //hexdump(payload, length);
+
+            // send message to client
+            // webSocket.sendBIN(num, payload, length);
+            break;
+    case WStype_ERROR:      
+    case WStype_FRAGMENT_TEXT_START:
+    case WStype_FRAGMENT_BIN_START:
+    case WStype_FRAGMENT:
+    case WStype_FRAGMENT_FIN:
+      break;
+    }
+
 }
 
 void setup(void) {
-  pinMode(led, OUTPUT);
-  digitalWrite(led, LED_OFF);
+  pinMode(LED_PIN,OUTPUT);
+  digitalWrite(LED_PIN,LED_OFF);
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
@@ -67,7 +117,8 @@ void setup(void) {
   M5.Lcd.setTextSize(2);
   M5.Lcd.setCursor(0, 0);
   M5.Lcd.println(WiFi.localIP());
-
+  M5.Lcd.println("http://esp32.local/");
+  
   if (MDNS.begin("esp32")) {
     Serial.println("MDNS responder started");
   }
@@ -83,8 +134,12 @@ void setup(void) {
 
   server.begin();
   Serial.println("HTTP server started");
+
+  webSocket.begin();//WebSocketサーバー開始
+  webSocket.onEvent(webSocketEvent);
 }
 
 void loop(void) {
+  webSocket.loop();
   server.handleClient();
 }

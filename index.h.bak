@@ -47,8 +47,6 @@ function mouseup(){
   document.getElementById("area1").innerText = "ここにマウスボタンが離されました。";
   ws.send("ws_polling");
 }
-
-
 function fwd_left(){
   document.getElementById("area1").innerText = "calling fwd_left";
   ws.send("ws_polling");
@@ -61,8 +59,6 @@ function fwd_right(){
   document.getElementById("area1").innerText = "calling fwd_right";
   ws.send("ws_polling");
 }
-
-
 function rv_left(){
   document.getElementById("area1").innerText = "calling rv_left";
   ws.send("ws_polling");
