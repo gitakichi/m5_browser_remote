@@ -36,25 +36,25 @@ const char index_str[] = R"=====(
 	}
 
 	function cmmd_N(){
-	  ws.send("N");
+	  ws.send("n");
 	}
 	function cmmd_Q(){
-	  ws.send("Q");
+	  ws.send("q");
 	}
 	function cmmd_W(){
-	  ws.send("W");
+	  ws.send("w");
 	}
 	function cmmd_E(){
-	  ws.send("E");
+	  ws.send("e");
 	}
 	function cmmd_A(){
-	  ws.send("A");
+	  ws.send("a");
 	}
 	function cmmd_S(){
-	  ws.send("S");
+	  ws.send("s");
 	}
 	function cmmd_D(){
-	  ws.send("D");
+	  ws.send("d");
 	}
 	
 	var key_det = 0;
@@ -64,8 +64,8 @@ const char index_str[] = R"=====(
 	    
 	    if(key_det === 0){
 	  		key_det = 1;
-		    if (keyName === 'q')		cmmd_Q();
-		    else if (keyName === 'w')	cmmd_W();
+		    if (keyName === 'q')	  	  cmmd_Q();
+		    else if (keyName === 'w')	  cmmd_W();
 		    else if (keyName === 'e') 	cmmd_E();
 		    else if (keyName === 'a') 	cmmd_A();
 		    else if (keyName === 's') 	cmmd_S();
@@ -77,8 +77,8 @@ const char index_str[] = R"=====(
 	    var keyName = event.key;
 	    
 	    key_det = 0;
-	    if (event.key === 'q')		cmmd_N();
-	    else if (keyName === 'w')	cmmd_N();
+	    if (event.key === 'q')		  cmmd_N();
+	    else if (keyName === 'w')	  cmmd_N();
 	    else if (keyName === 'e') 	cmmd_N();
 	    else if (keyName === 'a') 	cmmd_N();
 	    else if (keyName === 's') 	cmmd_N();
