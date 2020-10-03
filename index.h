@@ -12,24 +12,20 @@ const char index_str[] = R"=====(
 </head>
 	
 <body>
+<h3>m5_browser_remote</h3>
 <table>
     <tr>
-      <th><input type="button" value="↖" onmousedown="fwd_left();" onmouseup="mouseup();"/></th>
-      <th><input type="button" value="↑" onmousedown="fwd();" onmouseup="mouseup();"/></th>
-      <th><input type="button" value="↗" onmousedown="fwd_right();" onmouseup="mouseup();"/></th>
+      <th><input type="button" value="Q" onmousedown="cmmd_Q();" onmouseup="cmmd_N();"/></th>
+      <th><input type="button" value="W" onmousedown="cmmd_W();" onmouseup="cmmd_N();"/></th>
+      <th><input type="button" value="E" onmousedown="cmmd_E();" onmouseup="cmmd_N();"/></th>
     </tr>
     <tr>
-      <th><!--<input type="button" value="←" onmousedown="mousedown();" onmouseup="mouseup();"/>--></th>
-      <th>★<!--none--></th>
-      <th><!--<input type="button" value="→" onmousedown="mousedown();" onmouseup="mouseup();"/>--></th>
-    </tr>
-    <tr>
-      <th><input type="button" value="↙" onmousedown="rv_left();" onmouseup="mouseup();"/></th>
-      <th><input type="button" value="↓" onmousedown="rv();" onmouseup="mouseup();"/></th>
-      <th><input type="button" value="↘" onmousedown="rv_right();" onmouseup="mouseup();"/></th>
+      <th><input type="button" value="A" onmousedown="cmmd_A();" onmouseup="cmmd_N();"/></th>
+      <th><input type="button" value="S" onmousedown="cmmd_S();" onmouseup="cmmd_N();"/></th>
+      <th><input type="button" value="D" onmousedown="cmmd_D();" onmouseup="cmmd_N();"/></th>
     </tr>
   </table>
-<!--<div id="area1">ここでマウスボタンを押してください。</div>-->
+</body>
 
 <script>
 	var ws = new WebSocket('ws://' + window.location.hostname + ':81/');
@@ -38,39 +34,56 @@ const char index_str[] = R"=====(
 	  console.log("Websocket closed!");
 	  ws.close();
 	}
-	function mousedown(){
-	  document.getElementById("area1").innerText = "マウスボタンが押し下げられています。";
+
+	function cmmd_N(){
+	  ws.send("N");
 	}
-	function mouseup(){
-	  document.getElementById("area1").innerText = "ここにマウスボタンが離されました。";
-	  ws.send("ws_polling");
+	function cmmd_Q(){
+	  ws.send("Q");
 	}
-	function fwd_left(){
-	  document.getElementById("area1").innerText = "calling fwd_left";
-	  ws.send("ws_polling");
+	function cmmd_W(){
+	  ws.send("W");
 	}
-	function fwd(){
-	  document.getElementById("area1").innerText = "calling fwd";
-	  ws.send("ws_polling");
+	function cmmd_E(){
+	  ws.send("E");
 	}
-	function fwd_right(){
-	  document.getElementById("area1").innerText = "calling fwd_right";
-	  ws.send("ws_polling");
+	function cmmd_A(){
+	  ws.send("A");
 	}
-	function rv_left(){
-	  document.getElementById("area1").innerText = "calling rv_left";
-	  ws.send("ws_polling");
+	function cmmd_S(){
+	  ws.send("S");
 	}
-	function rv(){
-	  document.getElementById("area1").innerText = "calling rv";
-	  ws.send("ws_polling");
+	function cmmd_D(){
+	  ws.send("D");
 	}
-	function rv_right(){
-	  document.getElementById("area1").innerText = "calling rv_right";
-	  ws.send("ws_polling");
-	}
-</script>
-</body>
 	
+	var key_det = 0;
+	
+	document.addEventListener('keydown', event => {
+	    var keyName = event.key;
+	    
+	    if(key_det === 0){
+	  		key_det = 1;
+		    if (keyName === 'q')		cmmd_Q();
+		    else if (keyName === 'w')	cmmd_W();
+		    else if (keyName === 'e') 	cmmd_E();
+		    else if (keyName === 'a') 	cmmd_A();
+		    else if (keyName === 's') 	cmmd_S();
+		    else if (keyName === 'd') 	cmmd_D();
+		}
+    });
+    
+    document.addEventListener('keyup', event => {
+	    var keyName = event.key;
+	    
+	    key_det = 0;
+	    if (event.key === 'q')		cmmd_N();
+	    else if (keyName === 'w')	cmmd_N();
+	    else if (keyName === 'e') 	cmmd_N();
+	    else if (keyName === 'a') 	cmmd_N();
+	    else if (keyName === 's') 	cmmd_N();
+	    else if (keyName === 'd') 	cmmd_N();
+    }); 
+</script>
 </html>
 )=====";
