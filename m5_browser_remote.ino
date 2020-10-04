@@ -9,8 +9,8 @@
 
 #define DRV8830_A 0x60
 #define DRV8830_B 0x64
-#define CONTROL 0x00
-#define FAULT 0x01
+#define CONTROL   0x00
+#define FAULT     0x01
 
 //Wifi認証情報はsecret.hに記載
 //const char* ssid = "........";
@@ -32,7 +32,9 @@ void handleRC(void);
 void handleNotFound(void);
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length);
 void drv8830_setup(void);
-void drv8830_fwd(void);
+void drv8830_Q(void);
+void drv8830_W(void);
+void drv8830_E(void);
 void drv8830_rv(void);
 void drv8830_neutral(void);
 
@@ -70,7 +72,7 @@ void setup(void) {
     Serial.println("MDNS responder started");
   }
   server.on("/", handleRoot);
-  server.on("/remote", handleRC);
+  server.on("/remote", handle_remote);
   server.on("/inline", []() {
     server.send(200, "text/plain", "this works as well");
   });
@@ -104,7 +106,7 @@ void handleRoot(void) {
   digitalWrite(LED_PIN,LED_OFF);
 }
 
-void handleRC(void) {
+void handle_remote(void) {
   digitalWrite(LED_PIN,LED_ON);
   server.send(200, "text/HTML", index_str);
   digitalWrite(LED_PIN,LED_OFF);
@@ -143,7 +145,9 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
     }
     case WStype_TEXT:{//ここでデバッグする
       Serial.printf("[%u] get Text: %s\n", num, payload);
-      if(payload[0] == 'w')       drv8830_fwd();
+      if(payload[0] == 'q')       drv8830_Q();
+      else if(payload[0] == 'w')  drv8830_W();
+      else if(payload[0] == 'e')  drv8830_E();
       else if(payload[0] == 's')  drv8830_rv();
       else if(payload[0] == 'n')  drv8830_neutral();
       break;
@@ -182,7 +186,19 @@ void drv8830_setup(void){
   delay(1000);//1000msec待機(1秒待機);
 }
 
-void drv8830_fwd(void){
+void drv8830_Q(void){
+  Wire.beginTransmission(DRV8830_B);//I2Cスレーブ「Arduino Uno」のデータ送信開始
+  Wire.write(CONTROL);//コントロール
+  Wire.write(0x00);
+  Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
+
+  Wire.beginTransmission(DRV8830_A);//I2Cスレーブ「Arduino Uno」のデータ送信開始
+  Wire.write(CONTROL);//コントロール
+  Wire.write(0x12 << 2 | 0x02);
+  Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
+}
+
+void drv8830_W(void){
   Wire.beginTransmission(DRV8830_B);//I2Cスレーブ「Arduino Uno」のデータ送信開始
   Wire.write(CONTROL);//コントロール
   Wire.write(0x12 << 2 | 0x01);
@@ -194,6 +210,18 @@ void drv8830_fwd(void){
   Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
 }
 
+void drv8830_E(void){
+  Wire.beginTransmission(DRV8830_B);//I2Cスレーブ「Arduino Uno」のデータ送信開始
+  Wire.write(CONTROL);//コントロール
+  Wire.write(0x12 << 2 | 0x01);
+  Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
+
+  Wire.beginTransmission(DRV8830_A);//I2Cスレーブ「Arduino Uno」のデータ送信開始
+  Wire.write(CONTROL);//コントロール
+  Wire.write(0x00);
+  Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
+}
+
 void drv8830_rv(void){
   Wire.beginTransmission(DRV8830_B);//I2Cスレーブ「Arduino Uno」のデータ送信開始
   Wire.write(CONTROL);//コントロール
@@ -202,7 +230,7 @@ void drv8830_rv(void){
 
   Wire.beginTransmission(DRV8830_A);//I2Cスレーブ「Arduino Uno」のデータ送信開始
   Wire.write(CONTROL);//コントロール
-  Wire.write(0x12 << 2 | 0x01);
+  Wire.write(0x24 << 2 | 0x01);
   Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
 }
 
