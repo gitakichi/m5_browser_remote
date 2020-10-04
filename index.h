@@ -69,13 +69,13 @@ const char index_str[] = R"=====(
 	    
 	    if(key_det === 0){
 	  		key_det = 1;
-		    if (keyName === 'q')	  	  cmmd_Q();
-		    else if (keyName === 'w')	  cmmd_W();
+		    if (keyName === 'q')		cmmd_Q();
+		    else if (keyName === 'w')	cmmd_W();
 		    else if (keyName === 'e') 	cmmd_E();
 		    else if (keyName === 'a') 	cmmd_A();
 		    else if (keyName === 's') 	cmmd_S();
 		    else if (keyName === 'd') 	cmmd_D();
-        else if (keyName === 'n')   cmmd_N();
+		    else if (keyName === 'n')   cmmd_N();
 		}
     });
     
@@ -83,8 +83,8 @@ const char index_str[] = R"=====(
 	    var keyName = event.key;
 	    
 	    key_det = 0;
-	    if (event.key === 'q')		  cmmd_N();
-	    else if (keyName === 'w')	  cmmd_N();
+	    if (event.key === 'q')		cmmd_N();
+	    else if (keyName === 'w')	cmmd_N();
 	    else if (keyName === 'e') 	cmmd_N();
 	    else if (keyName === 'a') 	cmmd_N();
 	    else if (keyName === 's') 	cmmd_N();
