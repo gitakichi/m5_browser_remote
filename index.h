@@ -16,19 +16,19 @@ const char index_str[] = R"=====(
 <div id="result1"></div>
 <table>
     <tr>
-      <th><input type="button" value="Q" onmouseover="cmmd_Q(false);" onmouseout="cmmd_N(false);" onmousedown="cmmd_Q(true);" onmouseup="cmmd_N(true);"/></th>
-      <th><input type="button" value="W" onmouseover="cmmd_W(false);" onmouseout="cmmd_N(false);" onmousedown="cmmd_W(true);" onmouseup="cmmd_N(true);"/></th>
-      <th><input type="button" value="E" onmouseover="cmmd_E(false);" onmouseout="cmmd_N(false);" onmousedown="cmmd_E(true);" onmouseup="cmmd_N(true);"/></th>
+      <th><input type="button" value="Q" onmousedown="cmmd_Q();" onmouseup="cmmd_N(false);"/></th>
+      <th><input type="button" value="W" onmousedown="cmmd_W();" onmouseup="cmmd_N(false);"/></th>
+      <th><input type="button" value="E" onmousedown="cmmd_E();" onmouseup="cmmd_N(false);"/></th>
     </tr>
     <tr>
       <th></th>
-      <th><input type="button" value="N" onmouseover="cmmd_N(false);" onmouseup="cmmd_N(true);"/></th>
+      <th><input type="button" value="N" onmouseup="cmmd_N(true);"/></th>
       <th></th>
     </tr>
     <tr>
-      <th><input type="button" value="A" onmouseover="cmmd_A(false);" onmouseout="cmmd_N(false);" onmousedown="cmmd_A(true);" onmouseup="cmmd_N(true);"/></th>
-      <th><input type="button" value="S" onmouseover="cmmd_S(false);" onmouseout="cmmd_N(false);" onmousedown="cmmd_S(true);" onmouseup="cmmd_N(true);"/></th>
-      <th><input type="button" value="D" onmouseover="cmmd_D(false);" onmouseout="cmmd_N(false);" onmousedown="cmmd_D(true);" onmouseup="cmmd_N(true);"/></th>
+      <th><input type="button" value="A" onmousedown="cmmd_A();" onmouseup="cmmd_N(false);"/></th>
+      <th><input type="button" value="S" onmousedown="cmmd_S();" onmouseup="cmmd_N(false);"/></th>
+      <th><input type="button" value="D" onmousedown="cmmd_D();" onmouseup="cmmd_N(false);"/></th>
     </tr>
   </table>
 </body>
@@ -41,53 +41,41 @@ const char index_str[] = R"=====(
 	  ws.close();
 	}
 	
-	var isChecked = false;
+	var touchscreen = false;
 	
 	function change(){
-      isChecked = document.getElementById('check').checked;
-	  //console.log(isChecked)
-  	}
+    touchscreen = document.getElementById('check').checked;
+  //console.log(isChecked)
+	}
 
-	function cmmd_N(click_en){
-	  if(click_en || isChecked){
+	function cmmd_N(force){
+	  if(touchscreen == false || force == true){
 	  	ws.send("n");
 	  }
 	}
 	
-	function cmmd_Q(click_en){
-	  if(click_en || isChecked){
-	  	ws.send("q");
-	  }
+	function cmmd_Q(){
+	  ws.send("q");
 	}
 	
-	function cmmd_W(click_en){
-	  if(click_en || isChecked){
-	  	ws.send("w");
-	  }
+	function cmmd_W(){
+	  ws.send("w");
 	}
 	
-	function cmmd_E(click_en){
-	  if(click_en || isChecked){
-	  	ws.send("e");
-	  }
+	function cmmd_E(){
+	  ws.send("e");
 	}
 	
-	function cmmd_A(click_en){
-		if(click_en || isChecked){
-	  		ws.send("a");
-		}
+	function cmmd_A(){
+	  ws.send("a");
 	}
 	
-	function cmmd_S(click_en){
-	  if(click_en || isChecked){
-	  	ws.send("s");
-	  }
+	function cmmd_S(){
+	 	ws.send("s");
 	}
 	
-	function cmmd_D(click_en){
-	  if(click_en || isChecked){
-	  	ws.send("d");
-	  }
+	function cmmd_D(){
+	  ws.send("d");
 	}
 	
 	var key_det = 0;
@@ -97,8 +85,8 @@ const char index_str[] = R"=====(
 	    
 	    if(key_det === 0){
 	  		key_det = 1;
-		    if (keyName === 'q')		cmmd_Q(true);
-		    else if (keyName === 'w')	cmmd_W(true);
+		    if (keyName === 'q')		    cmmd_Q(true);
+		    else if (keyName === 'w')	  cmmd_W(true);
 		    else if (keyName === 'e') 	cmmd_E(true);
 		    else if (keyName === 'a') 	cmmd_A(true);
 		    else if (keyName === 's') 	cmmd_S(true);
@@ -111,8 +99,8 @@ const char index_str[] = R"=====(
 	    var keyName = event.key;
 	    
 	    key_det = 0;
-	    if (event.key === 'q')		cmmd_N(true);
-	    else if (keyName === 'w')	cmmd_N(true);
+	    if (event.key === 'q')		  cmmd_N(true);
+	    else if (keyName === 'w')	  cmmd_N(true);
 	    else if (keyName === 'e') 	cmmd_N(true);
 	    else if (keyName === 'a') 	cmmd_N(true);
 	    else if (keyName === 's') 	cmmd_N(true);
