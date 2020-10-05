@@ -153,7 +153,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
       break;
     }
     case WStype_TEXT:{//ここでデバッグする
-      Serial.printf("[%u] get Text: %s\n", num, payload);
+      //Serial.printf("[%u] get Text: %s\n", num, payload);//debug
       if(payload[0] == 'q')       drv8830_Q();
       else if(payload[0] == 'w')  drv8830_W();
       else if(payload[0] == 'e')  drv8830_E();
@@ -188,8 +188,8 @@ void drv8830_setup(void){
 void drv8830_func(char device,char dir){
   Wire.beginTransmission(device);//I2Cスレーブ「Arduino Uno」のデータ送信開始
   Wire.write(CONTROL);//コントロール
-  if(dir == 0x00) Wire.write(0x00);
-  else            Wire.write(0x12 << 2 | dir);
+  if(dir == DIR_N)  Wire.write(0x00);
+  else              Wire.write(0x12 << 2 | dir);
   Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
 }
 
