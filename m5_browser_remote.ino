@@ -12,16 +12,21 @@
 #define CONTROL   0x00
 #define FAULT     0x01
 
+#define DIR_N     0x00
+#define DIR_CCW   0x01
+#define DIR_CW    0x02
+#define DIR_B     0x03
+
 //Wifi認証情報はsecret.hに記載
 //const char* ssid = "........";
 //const char* password = "........";
 
 #define BTN_A_PIN 37
-#define LED_PIN 10//このLEDは電位を下げることで発光する
-#define LED_ON  LOW
-#define LED_OFF HIGH
-#define BTN_ON  LOW
-#define BTN_OFF HIGH
+#define LED_PIN   10//このLEDは電位を下げることで発光する
+#define LED_ON    LOW
+#define LED_OFF   HIGH
+#define BTN_ON    LOW
+#define BTN_OFF   HIGH
 
 WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
@@ -32,6 +37,7 @@ void handleRC(void);
 void handleNotFound(void);
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length);
 void drv8830_setup(void);
+void drv8830_func(char device,char dir);
 void drv8830_Q(void);
 void drv8830_W(void);
 void drv8830_E(void);
@@ -39,6 +45,7 @@ void drv8830_A(void);
 void drv8830_S(void);
 void drv8830_D(void);
 void drv8830_neutral(void);
+
 
 uint8_t prev_btn_a = BTN_OFF;
 uint8_t btn_a      = BTN_OFF;
@@ -162,12 +169,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
 void drv8830_setup(void){
   //I2C初期化
   Wire.begin(0, 26);
-
-  //DRV8830 CONTROLクリア
-  Wire.beginTransmission(DRV8830_A);//I2Cスレーブ「Arduino Uno」のデータ送信開始
-  Wire.write(CONTROL);//コントロール
-  Wire.write(0x00);//コントロールクリア
-  Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
+  drv8830_neutral();
 
   //DRV8830 FAULTクリア
   Wire.beginTransmission(DRV8830_A);//I2Cスレーブ「Arduino Uno」のデータ送信開始
@@ -175,13 +177,6 @@ void drv8830_setup(void){
   Wire.write(0x80);//フォルトクリア
   Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
 
-  //DRV8830 CONTROLクリア
-  Wire.beginTransmission(DRV8830_B);//I2Cスレーブ「Arduino Uno」のデータ送信開始
-  Wire.write(CONTROL);//コントロール
-  Wire.write(0x00);//コントロールクリア
-  Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
-
-  //DRV8830 FAULTクリア
   Wire.beginTransmission(DRV8830_B);//I2Cスレーブ「Arduino Uno」のデータ送信開始
   Wire.write(FAULT);//フォルト(障害状態)
   Wire.write(0x80);//フォルトクリア
@@ -190,86 +185,45 @@ void drv8830_setup(void){
   delay(1000);//1000msec待機(1秒待機);
 }
 
-void drv8830_Q(void){
-  Wire.beginTransmission(DRV8830_B);//I2Cスレーブ「Arduino Uno」のデータ送信開始
+void drv8830_func(char device,char dir){
+  Wire.beginTransmission(device);//I2Cスレーブ「Arduino Uno」のデータ送信開始
   Wire.write(CONTROL);//コントロール
-  Wire.write(0x00);
+  if(dir == 0x00) Wire.write(0x00);
+  else            Wire.write(0x12 << 2 | dir);
   Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
+}
 
-  Wire.beginTransmission(DRV8830_A);//I2Cスレーブ「Arduino Uno」のデータ送信開始
-  Wire.write(CONTROL);//コントロール
-  Wire.write(0x12 << 2 | 0x02);
-  Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
+void drv8830_Q(void){
+  drv8830_func(DRV8830_A,DIR_CW);
+  drv8830_func(DRV8830_B,DIR_N);
 }
 
 void drv8830_W(void){
-  Wire.beginTransmission(DRV8830_B);//I2Cスレーブ「Arduino Uno」のデータ送信開始
-  Wire.write(CONTROL);//コントロール
-  Wire.write(0x12 << 2 | 0x01);
-  Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
-
-  Wire.beginTransmission(DRV8830_A);//I2Cスレーブ「Arduino Uno」のデータ送信開始
-  Wire.write(CONTROL);//コントロール
-  Wire.write(0x12 << 2 | 0x02);
-  Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
+  drv8830_func(DRV8830_A,DIR_CW);
+  drv8830_func(DRV8830_B,DIR_CCW);
 }
 
 void drv8830_E(void){
-  Wire.beginTransmission(DRV8830_B);//I2Cスレーブ「Arduino Uno」のデータ送信開始
-  Wire.write(CONTROL);//コントロール
-  Wire.write(0x12 << 2 | 0x01);
-  Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
-
-  Wire.beginTransmission(DRV8830_A);//I2Cスレーブ「Arduino Uno」のデータ送信開始
-  Wire.write(CONTROL);//コントロール
-  Wire.write(0x00);
-  Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
+  drv8830_func(DRV8830_A,DIR_N);
+  drv8830_func(DRV8830_B,DIR_CCW);
 }
 
 void drv8830_A(void){
-  Wire.beginTransmission(DRV8830_B);//I2Cスレーブ「Arduino Uno」のデータ送信開始
-  Wire.write(CONTROL);//コントロール
-  Wire.write(0x00);
-  Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
-
-  Wire.beginTransmission(DRV8830_A);//I2Cスレーブ「Arduino Uno」のデータ送信開始
-  Wire.write(CONTROL);//コントロール
-  Wire.write(0x12 << 2 | 0x01);
-  Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
+  drv8830_func(DRV8830_A,DIR_CCW);
+  drv8830_func(DRV8830_B,DIR_N);
 }
 
 void drv8830_S(void){
-  Wire.beginTransmission(DRV8830_B);//I2Cスレーブ「Arduino Uno」のデータ送信開始
-  Wire.write(CONTROL);//コントロール
-  Wire.write(0x12 << 2 | 0x02);
-  Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
-
-  Wire.beginTransmission(DRV8830_A);//I2Cスレーブ「Arduino Uno」のデータ送信開始
-  Wire.write(CONTROL);//コントロール
-  Wire.write(0x12 << 2 | 0x01);
-  Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
+  drv8830_func(DRV8830_A,DIR_CCW);
+  drv8830_func(DRV8830_B,DIR_CW);
 }
 
 void drv8830_D(void){
-  Wire.beginTransmission(DRV8830_B);//I2Cスレーブ「Arduino Uno」のデータ送信開始
-  Wire.write(CONTROL);//コントロール
-  Wire.write(0x12 << 2 | 0x02);
-  Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
-
-  Wire.beginTransmission(DRV8830_A);//I2Cスレーブ「Arduino Uno」のデータ送信開始
-  Wire.write(CONTROL);//コントロール
-  Wire.write(0x00);
-  Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
+  drv8830_func(DRV8830_A,DIR_N);
+  drv8830_func(DRV8830_B,DIR_CW);
 }
 
 void drv8830_neutral(void){
-  Wire.beginTransmission(DRV8830_A);//I2Cスレーブ「Arduino Uno」のデータ送信開始
-  Wire.write(CONTROL);//コントロール
-  Wire.write(0x00);
-  Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
-
-  Wire.beginTransmission(DRV8830_B);//I2Cスレーブ「Arduino Uno」のデータ送信開始
-  Wire.write(CONTROL);//コントロール
-  Wire.write(0x00);
-  Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
+  drv8830_func(DRV8830_A,DIR_N);
+  drv8830_func(DRV8830_B,DIR_N);
 }
