@@ -13,8 +13,10 @@
 #define FAULT     0x01
 
 #define DIR_N     0x00
-#define DIR_CCW   0x01
-#define DIR_CW    0x02
+//#define DIR_CCW   0x01//タミヤ　ダブルギヤボックス、Bタイプ
+//#define DIR_CW    0x02//タミヤ　ダブルギヤボックス、Bタイプ
+#define DIR_CW    0x01//タミヤ　ダブルギヤボックス、Cタイプ
+#define DIR_CCW   0x02//タミヤ　ダブルギヤボックス、Cタイプ
 #define DIR_B     0x03
 
 //Wifi認証情報はsecret.hに記載
@@ -189,7 +191,7 @@ void drv8830_func(char device,char dir){
   Wire.beginTransmission(device);//I2Cスレーブ「Arduino Uno」のデータ送信開始
   Wire.write(CONTROL);//コントロール
   if(dir == DIR_N)  Wire.write(0x00);
-  else              Wire.write(0x12 << 2 | dir);
+  else              Wire.write(0x20 << 2 | dir);
   Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
 }
 
