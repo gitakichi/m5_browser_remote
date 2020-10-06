@@ -11,6 +11,9 @@
 		    width: 80%;
 		    font-size: 1.4em;
 		}
+		.table1 {
+			text-align: left;
+			}
 		.table2 {
 			    border-collapse:  collapse; /* セルの線を重ねる */
 			    width: 20%;
@@ -20,6 +23,9 @@
 			.button2 {
 			    width: 80%;
 			    font-size: 1.4em;
+			}
+			.table1 {
+				text-align: left;
 			}
 			.table2 {
 			    border-collapse:  collapse; /* セルの線を重ねる */
@@ -32,7 +38,26 @@
 	
 <body>
 <h3>m5_browser_remote</h3>
-<label><input type="checkbox" id="check" onchange="change()">Touchscreen</label>
+<div id="ws_status_msg"></div>
+
+<table class="table1">
+<tr>
+  <th>Speed</th>
+  <th>
+	<select id="speed" onChange="speed_change()">
+	<option value="1">1</option>
+	<option value="2" selected>2</option>
+	<option value="3">3</option>
+	<option value="4">4</option>
+	</select>
+  </th>
+</tr>
+<tr>
+  <th>Touchscreen</th>
+  <th><input type="checkbox" id="check" onchange="change()"></th>
+</tr>
+  </table>
+
 <div id="result1"></div>
 <table class="table2">
     <tr>
@@ -61,41 +86,58 @@
 	  ws.close();
 	}
 	
+	function parent_wssend(message){
+    if(ws.readyState == 1){
+      ws.send(message);
+    }
+    else{
+      var ws_status_msg = document.getElementById("ws_status_msg");
+          ws_status_msg.innerHTML = "サーバとの通信が切断されました。再読み込みしてください。";
+    }
+  }
+	
+	function speed_change(){
+	    var speed = document.getElementById("speed").value;
+	    //console.log(document.getElementById("speed").value);
+	    parent_wssend(speed);
+	    
+	}
+	
 	var touchscreen = false;
 	
 	function change(){
-    touchscreen = document.getElementById('check').checked;
-  //console.log(isChecked)
+	    touchscreen = document.getElementById('check').checked;
+	 	 //console.log(isChecked)
 	}
 
 	function cmmd_N(force){
 	  if(touchscreen == false || force == true){
-	  	ws.send("n");
+	    parent_wssend("n");
 	  }
 	}
-	
+  
 	function cmmd_Q(){
-	  ws.send("q");
+	  parent_wssend("q");
 	}
 	
 	function cmmd_W(){
-	  ws.send("w");
+	  parent_wssend("w");
 	}
 	
 	function cmmd_E(){
-	  ws.send("e");
+	  parent_wssend("e");
 	}
 	
 	function cmmd_A(){
-	  ws.send("a");
+	  parent_wssend("a");
 	}
 	
 	function cmmd_S(){
-	 	ws.send("s");
+	 	parent_wssend("s");
 	}
 	
 	function cmmd_D(){
-	  ws.send("d");
+	  parent_wssend("d");
 	}
 	
 	var key_det = 0;
@@ -105,26 +147,26 @@
 	    
 	    if(key_det === 0){
 	  		key_det = 1;
-		    if (keyName === 'q')		    cmmd_Q(true);
-		    else if (keyName === 'w')	  cmmd_W(true);
-		    else if (keyName === 'e') 	cmmd_E(true);
-		    else if (keyName === 'a') 	cmmd_A(true);
-		    else if (keyName === 's') 	cmmd_S(true);
-		    else if (keyName === 'd') 	cmmd_D(true);
+		    if (keyName === 'q')		    cmmd_Q();
+		    else if (keyName === 'w')	  cmmd_W();
+		    else if (keyName === 'e') 	cmmd_E();
+		    else if (keyName === 'a') 	cmmd_A();
+		    else if (keyName === 's') 	cmmd_S();
+		    else if (keyName === 'd') 	cmmd_D();
 		    else if (keyName === 'n')   cmmd_N(true);
-		}
+		  }
     });
     
     document.addEventListener('keyup', event => {
 	    var keyName = event.key;
 	    
 	    key_det = 0;
-	    if (event.key === 'q')		  cmmd_N(true);
-	    else if (keyName === 'w')	  cmmd_N(true);
-	    else if (keyName === 'e') 	cmmd_N(true);
-	    else if (keyName === 'a') 	cmmd_N(true);
-	    else if (keyName === 's') 	cmmd_N(true);
-	    else if (keyName === 'd') 	cmmd_N(true);
+	    if (event.key === 'q')		  cmmd_N(false);
+	    else if (keyName === 'w')	  cmmd_N(false);
+	    else if (keyName === 'e') 	cmmd_N(false);
+	    else if (keyName === 'a') 	cmmd_N(false);
+	    else if (keyName === 's') 	cmmd_N(false);
+	    else if (keyName === 'd') 	cmmd_N(false);
     }); 
 </script>
 </html>

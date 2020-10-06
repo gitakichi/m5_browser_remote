@@ -52,6 +52,13 @@ void drv8830_neutral(void);
 uint8_t prev_btn_a = BTN_OFF;
 uint8_t btn_a      = BTN_OFF;
 
+#define SPEED_1 0x0D
+#define SPEED_2 0x15
+#define SPEED_3 0x1D
+#define SPEED_4 0x25
+
+char m_speed = SPEED_2;//default
+
 void setup(void) {
   pinMode(LED_PIN,OUTPUT);
   pinMode(BTN_A_PIN,INPUT_PULLUP);
@@ -155,7 +162,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
       break;
     }
     case WStype_TEXT:{//ここでデバッグする
-      //Serial.printf("[%u] get Text: %s\n", num, payload);//debug
+      Serial.printf("[%u] get Text: %s\n", num, payload);//debug
       if(payload[0] == 'q')       drv8830_Q();
       else if(payload[0] == 'w')  drv8830_W();
       else if(payload[0] == 'e')  drv8830_E();
@@ -163,6 +170,10 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
       else if(payload[0] == 's')  drv8830_S();
       else if(payload[0] == 'd')  drv8830_D();
       else if(payload[0] == 'n')  drv8830_neutral();
+      else if(payload[0] == '1')  m_speed = SPEED_1;
+      else if(payload[0] == '2')  m_speed = SPEED_2;
+      else if(payload[0] == '3')  m_speed = SPEED_3;
+      else if(payload[0] == '3')  m_speed = SPEED_4;
       break;
     }
   }
@@ -191,7 +202,7 @@ void drv8830_func(char device,char dir){
   Wire.beginTransmission(device);//I2Cスレーブ「Arduino Uno」のデータ送信開始
   Wire.write(CONTROL);//コントロール
   if(dir == DIR_N)  Wire.write(0x00);
-  else              Wire.write(0x20 << 2 | dir);
+  else              Wire.write(m_speed << 2 | dir);
   Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
 }
 

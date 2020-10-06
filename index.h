@@ -15,6 +15,9 @@ const char index_str[] = R"=====(
 		    width: 80%;
 		    font-size: 1.4em;
 		}
+		.table1 {
+			text-align: left;
+			}
 		.table2 {
 			    border-collapse:  collapse; /* セルの線を重ねる */
 			    width: 20%;
@@ -24,6 +27,9 @@ const char index_str[] = R"=====(
 			.button2 {
 			    width: 80%;
 			    font-size: 1.4em;
+			}
+			.table1 {
+				text-align: left;
 			}
 			.table2 {
 			    border-collapse:  collapse; /* セルの線を重ねる */
@@ -37,7 +43,25 @@ const char index_str[] = R"=====(
 <body>
 <h3>m5_browser_remote</h3>
 <div id="ws_status_msg"></div>
-<label><input type="checkbox" id="check" onchange="change()">Touchscreen</label>
+
+<table class="table1">
+<tr>
+  <th>Speed</th>
+  <th>
+	<select id="speed" onChange="speed_change()">
+	<option value="1">1</option>
+	<option value="2" selected>2</option>
+	<option value="3">3</option>
+	<option value="4">4</option>
+	</select>
+  </th>
+</tr>
+<tr>
+  <th>Touchscreen</th>
+  <th><input type="checkbox" id="check" onchange="change()"></th>
+</tr>
+  </table>
+
 <div id="result1"></div>
 <table class="table2">
     <tr>
@@ -66,15 +90,6 @@ const char index_str[] = R"=====(
 	  ws.close();
 	}
 	
-	var touchscreen = false;
-	
-	function change(){
-    touchscreen = document.getElementById('check').checked;
-  //console.log(isChecked)
-	}
-
-
-	
 	function parent_wssend(message){
     if(ws.readyState == 1){
       ws.send(message);
@@ -84,12 +99,26 @@ const char index_str[] = R"=====(
           ws_status_msg.innerHTML = "サーバとの通信が切断されました。再読み込みしてください。";
     }
   }
+	
+	function speed_change(){
+	    var speed = document.getElementById("speed").value;
+	    //console.log(document.getElementById("speed").value);
+	    parent_wssend(speed);
+	    
+	}
+	
+	var touchscreen = false;
+	
+	function change(){
+	    touchscreen = document.getElementById('check').checked;
+	 	 //console.log(isChecked)
+	}
 
-  function cmmd_N(force){
-    if(touchscreen == false || force == true){
-      parent_wssend("n");
-    }
-  }
+	function cmmd_N(force){
+	  if(touchscreen == false || force == true){
+	    parent_wssend("n");
+	  }
+	}
   
 	function cmmd_Q(){
 	  parent_wssend("q");
