@@ -39,23 +39,23 @@ void handleRC(void);
 void handleNotFound(void);
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length);
 void drv8830_setup(void);
-void drv8830_func(char device,char dir);
-void drv8830_Q(void);
-void drv8830_W(void);
-void drv8830_E(void);
-void drv8830_A(void);
-void drv8830_S(void);
-void drv8830_D(void);
+void drv8830_func(char m_speed,char device,char dir);
+void drv8830_Q(char m_speed);
+void drv8830_W(char m_speed);
+void drv8830_E(char m_speed);
+void drv8830_A(char m_speed);
+void drv8830_S(char m_speed);
+void drv8830_D(char m_speed);
 void drv8830_neutral(void);
 
 
 uint8_t prev_btn_a = BTN_OFF;
 uint8_t btn_a      = BTN_OFF;
 
-#define SPEED_1 0x0D
-#define SPEED_2 0x15
-#define SPEED_3 0x1D
-#define SPEED_4 0x25
+#define SPEED_1 0x09
+#define SPEED_2 0x0D
+#define SPEED_3 0x11
+#define SPEED_4 0x15
 
 char m_speed = SPEED_2;//default
 
@@ -163,17 +163,17 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
     }
     case WStype_TEXT:{//ここでデバッグする
       Serial.printf("[%u] get Text: %s\n", num, payload);//debug
-      if(payload[0] == 'q')       drv8830_Q();
-      else if(payload[0] == 'w')  drv8830_W();
-      else if(payload[0] == 'e')  drv8830_E();
-      else if(payload[0] == 'a')  drv8830_A();
-      else if(payload[0] == 's')  drv8830_S();
-      else if(payload[0] == 'd')  drv8830_D();
+      if(payload[0] == 'q')       drv8830_Q(m_speed);
+      else if(payload[0] == 'w')  drv8830_W(m_speed);
+      else if(payload[0] == 'e')  drv8830_E(m_speed);
+      else if(payload[0] == 'a')  drv8830_A(m_speed);
+      else if(payload[0] == 's')  drv8830_S(m_speed);
+      else if(payload[0] == 'd')  drv8830_D(m_speed);
       else if(payload[0] == 'n')  drv8830_neutral();
       else if(payload[0] == '1')  m_speed = SPEED_1;
       else if(payload[0] == '2')  m_speed = SPEED_2;
       else if(payload[0] == '3')  m_speed = SPEED_3;
-      else if(payload[0] == '3')  m_speed = SPEED_4;
+      else if(payload[0] == '4')  m_speed = SPEED_4;
       break;
     }
   }
@@ -198,7 +198,9 @@ void drv8830_setup(void){
   delay(1000);//1000msec待機(1秒待機);
 }
 
-void drv8830_func(char device,char dir){
+void drv8830_func(char m_speed,char device,char dir){
+  //Serial.println(m_speed,HEX);
+  
   Wire.beginTransmission(device);//I2Cスレーブ「Arduino Uno」のデータ送信開始
   Wire.write(CONTROL);//コントロール
   if(dir == DIR_N)  Wire.write(0x00);
@@ -206,37 +208,37 @@ void drv8830_func(char device,char dir){
   Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
 }
 
-void drv8830_Q(void){
-  drv8830_func(DRV8830_A,DIR_CW);
-  drv8830_func(DRV8830_B,DIR_N);
+void drv8830_Q(char m_speed){
+  drv8830_func(m_speed,DRV8830_A,DIR_CW);
+  drv8830_func(m_speed,DRV8830_B,DIR_N);
 }
 
-void drv8830_W(void){
-  drv8830_func(DRV8830_A,DIR_CW);
-  drv8830_func(DRV8830_B,DIR_CCW);
+void drv8830_W(char m_speed){
+  drv8830_func(m_speed,DRV8830_A,DIR_CW);
+  drv8830_func(m_speed,DRV8830_B,DIR_CCW);
 }
 
-void drv8830_E(void){
-  drv8830_func(DRV8830_A,DIR_N);
-  drv8830_func(DRV8830_B,DIR_CCW);
+void drv8830_E(char m_speed){
+  drv8830_func(m_speed,DRV8830_A,DIR_N);
+  drv8830_func(m_speed,DRV8830_B,DIR_CCW);
 }
 
-void drv8830_A(void){
-  drv8830_func(DRV8830_A,DIR_CCW);
-  drv8830_func(DRV8830_B,DIR_N);
+void drv8830_A(char m_speed){
+  drv8830_func(m_speed,DRV8830_A,DIR_CCW);
+  drv8830_func(m_speed,DRV8830_B,DIR_N);
 }
 
-void drv8830_S(void){
-  drv8830_func(DRV8830_A,DIR_CCW);
-  drv8830_func(DRV8830_B,DIR_CW);
+void drv8830_S(char m_speed){
+  drv8830_func(m_speed,DRV8830_A,DIR_CCW);
+  drv8830_func(m_speed,DRV8830_B,DIR_CW);
 }
 
-void drv8830_D(void){
-  drv8830_func(DRV8830_A,DIR_N);
-  drv8830_func(DRV8830_B,DIR_CW);
+void drv8830_D(char m_speed){
+  drv8830_func(m_speed,DRV8830_A,DIR_N);
+  drv8830_func(m_speed,DRV8830_B,DIR_CW);
 }
 
 void drv8830_neutral(void){
-  drv8830_func(DRV8830_A,DIR_N);
-  drv8830_func(DRV8830_B,DIR_N);
+  drv8830_func(m_speed,DRV8830_A,DIR_N);
+  drv8830_func(m_speed,DRV8830_B,DIR_N);
 }
