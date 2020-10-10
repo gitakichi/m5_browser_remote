@@ -13,10 +13,8 @@
 #define FAULT     0x01
 
 #define DIR_N     0x00
-//#define DIR_CCW   0x01//タミヤ　ダブルギヤボックス、Bタイプ
-//#define DIR_CW    0x02//タミヤ　ダブルギヤボックス、Bタイプ
-#define DIR_CW    0x01//タミヤ　ダブルギヤボックス、Cタイプ
-#define DIR_CCW   0x02//タミヤ　ダブルギヤボックス、Cタイプ
+#define DIR_CW    0x01
+#define DIR_CCW   0x02
 #define DIR_B     0x03
 
 //Wifi認証情報はsecret.hに記載
@@ -209,33 +207,33 @@ void drv8830_func(char m_speed,char device,char dir){
 }
 
 void drv8830_Q(char m_speed){
-  drv8830_func(m_speed,DRV8830_A,DIR_CW);
-  drv8830_func(m_speed,DRV8830_B,DIR_N);
+  drv8830_func(m_speed,DRV8830_A,DIR_N);
+  drv8830_func(m_speed,DRV8830_B,DIR_CW);
 }
 
 void drv8830_W(char m_speed){
-  drv8830_func(m_speed,DRV8830_A,DIR_CW);
-  drv8830_func(m_speed,DRV8830_B,DIR_CCW);
+  drv8830_func(m_speed,DRV8830_A,DIR_CCW);
+  drv8830_func(m_speed,DRV8830_B,DIR_CW);
 }
 
 void drv8830_E(char m_speed){
-  drv8830_func(m_speed,DRV8830_A,DIR_N);
-  drv8830_func(m_speed,DRV8830_B,DIR_CCW);
-}
-
-void drv8830_A(char m_speed){
   drv8830_func(m_speed,DRV8830_A,DIR_CCW);
   drv8830_func(m_speed,DRV8830_B,DIR_N);
 }
 
+void drv8830_A(char m_speed){
+  drv8830_func(m_speed,DRV8830_A,DIR_N);
+  drv8830_func(m_speed,DRV8830_B,DIR_CCW);
+}
+
 void drv8830_S(char m_speed){
-  drv8830_func(m_speed,DRV8830_A,DIR_CCW);
-  drv8830_func(m_speed,DRV8830_B,DIR_CW);
+  drv8830_func(m_speed,DRV8830_A,DIR_CW);
+  drv8830_func(m_speed,DRV8830_B,DIR_CCW);
 }
 
 void drv8830_D(char m_speed){
-  drv8830_func(m_speed,DRV8830_A,DIR_N);
-  drv8830_func(m_speed,DRV8830_B,DIR_CW);
+  drv8830_func(m_speed,DRV8830_A,DIR_CW);
+  drv8830_func(m_speed,DRV8830_B,DIR_N);
 }
 
 void drv8830_neutral(void){

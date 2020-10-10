@@ -12,7 +12,8 @@ const char index_str[] = R"=====(
 	<title>m5_browser_remote</title>
 	<style>
 		.button2 {
-		    width: 80%;
+		    width: 90%;
+		    height: 90%;
 		    font-size: 1.4em;
 		}
 		.table1 {
@@ -21,11 +22,13 @@ const char index_str[] = R"=====(
 		.table2 {
 			    border-collapse:  collapse; /* セルの線を重ねる */
 			    width: 20%;
+			    height: 20vw;
 			    table-layout: fixed;        /* セルの幅計算指定 */
 			}
 		@media screen and (max-width:480px) {
 			.button2 {
-			    width: 80%;
+			    width: 90%;
+			    height: 90%;
 			    font-size: 1.4em;
 			}
 			.table1 {
@@ -34,6 +37,7 @@ const char index_str[] = R"=====(
 			.table2 {
 			    border-collapse:  collapse; /* セルの線を重ねる */
 			    width:  100%;               /* 幅指定 */
+			    height: 100vw;
 			    table-layout: fixed;        /* セルの幅計算指定 */
 			}
 		}
