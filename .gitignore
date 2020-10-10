@@ -3,3 +3,5 @@ secret.h
 *.bak
 *.h.bak
 
+*.bak
+index.h.bak
