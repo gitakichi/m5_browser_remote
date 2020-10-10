@@ -1,4 +1,5 @@
 # Visual C++ cache files
 secret.h
 *.bak
+*.h.bak
 
