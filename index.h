@@ -65,8 +65,8 @@ const char index_str[] = R"=====(
   <th><input type="checkbox" id="check" onchange="change()"></th>
 </tr>
   </table>
-
-<div id="result1"></div>
+  
+  
 <table class="table2">
     <tr>
       <th><input type="button" class = "button2" value="Q" onmousedown="cmmd_Q();" onmouseup="cmmd_N(false);"/></th>
@@ -87,6 +87,15 @@ const char index_str[] = R"=====(
 </body>
 
 <script>
+	var touchscreen = false;
+	
+	if(document.documentElement.clientWidth <= 480){
+		var checkbox = document.getElementById("check");
+		checkbox.checked = true;
+		
+		change();
+	}
+	
 	var ws = new WebSocket('ws://' + window.location.hostname + ':81/');
 
 	ws.onclose = function(evt){
@@ -111,11 +120,9 @@ const char index_str[] = R"=====(
 	    
 	}
 	
-	var touchscreen = false;
-	
 	function change(){
 	    touchscreen = document.getElementById('check').checked;
-	 	 //console.log(isChecked)
+	    //console.log("changed")
 	}
 
 	function cmmd_N(force){
