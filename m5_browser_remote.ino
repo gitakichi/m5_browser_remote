@@ -57,6 +57,7 @@ uint8_t btn_a      = BTN_OFF;
 
 char m_speed = SPEED_2;//default
 
+
 void setup(void) {
   pinMode(LED_PIN,OUTPUT);
   pinMode(BTN_A_PIN,INPUT_PULLUP);
@@ -161,17 +162,30 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
     }
     case WStype_TEXT:{//ここでデバッグする
       Serial.printf("[%u] get Text: %s\n", num, payload);//debug
-      if(payload[0] == 'q')       drv8830_Q(m_speed);
-      else if(payload[0] == 'w')  drv8830_W(m_speed);
-      else if(payload[0] == 'e')  drv8830_E(m_speed);
-      else if(payload[0] == 'a')  drv8830_A(m_speed);
-      else if(payload[0] == 's')  drv8830_S(m_speed);
-      else if(payload[0] == 'd')  drv8830_D(m_speed);
-      else if(payload[0] == 'n')  drv8830_neutral();
-      else if(payload[0] == '1')  m_speed = SPEED_1;
-      else if(payload[0] == '2')  m_speed = SPEED_2;
-      else if(payload[0] == '3')  m_speed = SPEED_3;
-      else if(payload[0] == '4')  m_speed = SPEED_4;
+      int load_len = sizeof(payload);//sizeof("n,2\n") == 4
+      /*int i=0;
+      char received[10];
+      while(i<8 && payload[i]!='\0'){
+        received[i]=payload[i];
+        i++;
+      }
+      received[i]='\0';
+      */
+      if(load_len == 4){     
+        if(payload[2] == '1')       m_speed = SPEED_1;
+        else if(payload[2] == '2')  m_speed = SPEED_2;
+        else if(payload[2] == '3')  m_speed = SPEED_3;
+        else if(payload[2] == '4')  m_speed = SPEED_4;
+        //Serial.println(m_speed,HEX);
+      
+        if(payload[0] == 'q')       drv8830_Q(m_speed);
+        else if(payload[0] == 'w')  drv8830_W(m_speed);
+        else if(payload[0] == 'e')  drv8830_E(m_speed);
+        else if(payload[0] == 'a')  drv8830_A(m_speed);
+        else if(payload[0] == 's')  drv8830_S(m_speed);
+        else if(payload[0] == 'd')  drv8830_D(m_speed);
+        else if(payload[0] == 'n')  drv8830_neutral();
+      }
       break;
     }
   }
