@@ -59,7 +59,7 @@ const char index_str[] = R"=====(
 	<option value="4">4</option>
 	</select>-->
 	
-	<input type="range" id="speed" min="1" max="4" value="2" onChange="speed_change()"> 
+	<input type="range" id="speed" min="0" max="3" value="1" onChange="speed_change()"> 
 	
   </th>
 </tr>

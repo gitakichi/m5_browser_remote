@@ -1,26 +1,27 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <WebSocketsServer.h>
-#include <ESPmDNS.h>
 #include <M5StickC.h>
 #include <Wire.h>
 #include "secret.h"
 #include "index.h"
 
+//for DRV8830
 #define DRV8830_A 0x60//右モーター
 #define DRV8830_B 0x64//左モーター
 #define CONTROL   0x00
 #define FAULT     0x01
-
 #define DIR_N     0x00
 #define DIR_CW    0x01
 #define DIR_CCW   0x02
 #define DIR_B     0x03
+#define SPEED_0 0x06
 
 //Wifi認証情報はsecret.hに記載
 //const char* ssid = "........";
 //const char* password = "........";
 
+//for M5StickC
 #define BTN_A_PIN 37
 #define LED_PIN   10//このLEDは電位を下げることで発光する
 #define LED_ON    LOW
@@ -32,7 +33,7 @@ WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
 //環境設定->コンパイラの警告->初期値
 
-void handleRoot(void);
+//void handleRoot(void);
 void handleRC(void);
 void handleNotFound(void);
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length);
@@ -46,17 +47,9 @@ void drv8830_S(char m_speed);
 void drv8830_D(char m_speed);
 void drv8830_neutral(void);
 
-
+//Global variable
 uint8_t prev_btn_a = BTN_OFF;
 uint8_t btn_a      = BTN_OFF;
-
-#define SPEED_1 0x09
-#define SPEED_2 0x0D
-#define SPEED_3 0x11
-#define SPEED_4 0x15
-
-char m_speed = SPEED_2;//default
-
 
 void setup(void) {
   pinMode(LED_PIN,OUTPUT);
@@ -79,20 +72,12 @@ void setup(void) {
   Serial.println(WiFi.localIP());
 
   M5.begin();
-  M5.Lcd.setRotation(3);// 0-3で画面の向き
+  M5.Lcd.setRotation(1);// 0-3で画面の向き
   M5.Lcd.setTextSize(2);
   M5.Lcd.setCursor(0, 0);
   M5.Lcd.println(WiFi.localIP());
-  M5.Lcd.println("http://esp32.local/");
-  
-  if (MDNS.begin("esp32")) {
-    Serial.println("MDNS responder started");
-  }
-  server.on("/", handleRoot);
-  server.on("/remote", handle_remote);
-  server.on("/inline", []() {
-    server.send(200, "text/plain", "this works as well");
-  });
+
+  server.on("/", handle_remote);
   server.onNotFound(handleNotFound);
   server.begin();
   Serial.println("HTTP server started");
@@ -111,17 +96,18 @@ void loop(void) {
   if(prev_btn_a == BTN_OFF && btn_a == BTN_ON){
     drv8830_neutral();
     digitalWrite(LED_PIN,LED_ON);
-    delay(100);
+    delay(100);//TBD
     digitalWrite(LED_PIN,LED_OFF);
   }
   prev_btn_a = btn_a;
 }
-
+/*
 void handleRoot(void) {
   digitalWrite(LED_PIN,LED_ON);
   server.send(200, "text/plain", "hello from M5StickC!");
   digitalWrite(LED_PIN,LED_OFF);
 }
+*/
 
 void handle_remote(void) {
   digitalWrite(LED_PIN,LED_ON);
@@ -163,19 +149,10 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
     case WStype_TEXT:{//ここでデバッグする
       Serial.printf("[%u] get Text: %s\n", num, payload);//debug
       int load_len = sizeof(payload);//sizeof("n,2\n") == 4
-      /*int i=0;
-      char received[10];
-      while(i<8 && payload[i]!='\0'){
-        received[i]=payload[i];
-        i++;
-      }
-      received[i]='\0';
-      */
+      
       if(load_len == 4){     
-        if(payload[2] == '1')       m_speed = SPEED_1;
-        else if(payload[2] == '2')  m_speed = SPEED_2;
-        else if(payload[2] == '3')  m_speed = SPEED_3;
-        else if(payload[2] == '4')  m_speed = SPEED_4;
+        char raw_speed = payload[2]-'0';
+        char m_speed = (raw_speed<<2|0x03)+SPEED_0;
         //Serial.println(m_speed,HEX);
       
         if(payload[0] == 'q')       drv8830_Q(m_speed);
@@ -251,6 +228,6 @@ void drv8830_D(char m_speed){
 }
 
 void drv8830_neutral(void){
-  drv8830_func(m_speed,DRV8830_A,DIR_N);
-  drv8830_func(m_speed,DRV8830_B,DIR_N);
+  drv8830_func(SPEED_0,DRV8830_A,DIR_N);
+  drv8830_func(SPEED_0,DRV8830_B,DIR_N);
 }
