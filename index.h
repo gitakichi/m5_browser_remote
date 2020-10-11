@@ -52,12 +52,15 @@ const char index_str[] = R"=====(
 <tr>
   <th>Speed</th>
   <th>
-	<select id="speed" onChange="speed_change()">
+	<!--<select id="speed" onChange="speed_change()">
 	<option value="1">1</option>
 	<option value="2" selected>2</option>
 	<option value="3">3</option>
 	<option value="4">4</option>
-	</select>
+	</select>-->
+	
+	<input type="range" id="speed" min="1" max="4" value="2" onChange="speed_change()"> 
+	
   </th>
 </tr>
 <tr>
@@ -96,6 +99,8 @@ const char index_str[] = R"=====(
 		change();
 	}
 	
+	var speed = document.getElementById("speed").value;
+	
 	var ws = new WebSocket('ws://' + window.location.hostname + ':81/');
 
 	ws.onclose = function(evt){
@@ -114,8 +119,8 @@ const char index_str[] = R"=====(
   }
 	
 	function speed_change(){
-	    var speed = document.getElementById("speed").value;
-	    //console.log(document.getElementById("speed").value);
+	    speed = document.getElementById("speed").value;
+	    //console.log(speed);
 	    parent_wssend(speed);
 	    
 	}
@@ -127,32 +132,33 @@ const char index_str[] = R"=====(
 
 	function cmmd_N(force){
 	  if(touchscreen == false || force == true){
-	    parent_wssend("n");
+	    parent_wssend("n"+","+speed);
 	  }
 	}
   
 	function cmmd_Q(){
-	  parent_wssend("q");
+	  //console.log("q"+","+speed);
+	  parent_wssend("q"+","+speed);
 	}
 	
 	function cmmd_W(){
-	  parent_wssend("w");
+	  parent_wssend("w"+","+speed);
 	}
 	
 	function cmmd_E(){
-	  parent_wssend("e");
+	  parent_wssend("e"+","+speed);
 	}
 	
 	function cmmd_A(){
-	  parent_wssend("a");
+	  parent_wssend("a"+","+speed);
 	}
 	
 	function cmmd_S(){
-	 	parent_wssend("s");
+	 	parent_wssend("s"+","+speed);
 	}
 	
 	function cmmd_D(){
-	  parent_wssend("d");
+	  parent_wssend("d"+","+speed);
 	}
 	
 	var key_det = 0;
