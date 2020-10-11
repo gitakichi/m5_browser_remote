@@ -151,8 +151,13 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
       int load_len = sizeof(payload);//sizeof("n,2\n") == 4
       
       if(load_len == 4){     
-        char raw_speed = payload[2]-'0';
-        char m_speed = (raw_speed<<2|0x03)+SPEED_0;
+        char raw_speed;
+        if(payload[2]>='0' && payload[2]<='9')       raw_speed = payload[2]-'0';
+        else if(payload[2]>='a' && payload[2]<='f')  raw_speed = payload[2]-'a'+0x0A;
+        else if(payload[2]>='A' && payload[2]<='F')  raw_speed = payload[2]-'A'+0x0A;
+        
+        char m_speed = raw_speed + SPEED_0;
+        //Serial.print("0x");
         //Serial.println(m_speed,HEX);
       
         if(payload[0] == 'q')       drv8830_Q(m_speed);

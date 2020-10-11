@@ -21,8 +21,8 @@ const char index_str[] = R"=====(
 			}
 		.table2 {
 			    border-collapse:  collapse; /* セルの線を重ねる */
-			    width: 20%;
-			    height: 20vw;
+			    width: 200px;
+			    height: 200px;
 			    table-layout: fixed;        /* セルの幅計算指定 */
 			}
 		@media screen and (max-width:480px) {
@@ -59,7 +59,7 @@ const char index_str[] = R"=====(
 	<option value="4">4</option>
 	</select>-->
 	
-	<input type="range" id="speed" min="0" max="3" value="1" onChange="speed_change()"> 
+	<input type="range" id="speed" min="0" max="15" value="7" onChange="speed_change()"> 
 	
   </th>
 </tr>
@@ -99,7 +99,7 @@ const char index_str[] = R"=====(
 		change();
 	}
 	
-	var speed = document.getElementById("speed").value;
+	var speed = Number(document.getElementById("speed").value).toString(16);
 	
 	var ws = new WebSocket('ws://' + window.location.hostname + ':81/');
 
@@ -114,20 +114,18 @@ const char index_str[] = R"=====(
     }
     else{
       var ws_status_msg = document.getElementById("ws_status_msg");
-          ws_status_msg.innerHTML = "サーバとの通信が切断されました。再読み込みしてください。";
+      ws_status_msg.innerHTML = "サーバとの通信が切断されました。再読み込みしてください。";
     }
   }
 	
 	function speed_change(){
-	    speed = document.getElementById("speed").value;
+	    speed = Number(document.getElementById("speed").value).toString(16);
 	    //console.log(speed);
-	    parent_wssend(speed);
-	    
 	}
 	
 	function change(){
 	    touchscreen = document.getElementById('check').checked;
-	    //console.log("changed")
+	    //console.log("changed");
 	}
 
 	function cmmd_N(force){
