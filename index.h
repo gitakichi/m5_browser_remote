@@ -110,7 +110,7 @@ const char index_str[] = R"=====(
 	}
 	
 	function parent_wssend(message){
-	    console.log(cmmd+","+speed);
+	    console.log(message);
 	    
 	    if(ws.readyState == 1){
 	      ws.send(message);
@@ -130,7 +130,6 @@ const char index_str[] = R"=====(
 	function change(){
 	    touchscreen = document.getElementById('check').checked;
 	    //console.log("changed");
-	    parent_wssend(cmmd+","+speed);
 	}
 
 	function cmmd_N(force){
