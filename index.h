@@ -72,9 +72,9 @@ const char index_str[] = R"=====(
   
 <table class="table2">
     <tr>
-      <th><input type="button" class = "button2" value="Q" onmousedown="cmmd_Q();" onmouseup="cmmd_N(false);"/></th>
-      <th><input type="button" class = "button2" value="W" onmousedown="cmmd_W();" onmouseup="cmmd_N(false);"/></th>
-      <th><input type="button" class = "button2" value="E" onmousedown="cmmd_E();" onmouseup="cmmd_N(false);"/></th>
+      <th><input type="button" class = "button2" value="Q" onmousedown="cmmd_norm('q');" onmouseup="cmmd_N(false);"/></th>
+      <th><input type="button" class = "button2" value="W" onmousedown="cmmd_norm('w');" onmouseup="cmmd_N(false);"/></th>
+      <th><input type="button" class = "button2" value="E" onmousedown="cmmd_norm('e');" onmouseup="cmmd_N(false);"/></th>
     </tr>
     <tr>
       <th></th>
@@ -82,9 +82,9 @@ const char index_str[] = R"=====(
       <th></th>
     </tr>
     <tr>
-      <th><input type="button" class = "button2" value="A" onmousedown="cmmd_A();" onmouseup="cmmd_N(false);"/></th>
-      <th><input type="button" class = "button2" value="S" onmousedown="cmmd_S();" onmouseup="cmmd_N(false);"/></th>
-      <th><input type="button" class = "button2" value="D" onmousedown="cmmd_D();" onmouseup="cmmd_N(false);"/></th>
+      <th><input type="button" class = "button2" value="A" onmousedown="cmmd_norm('a');" onmouseup="cmmd_N(false);"/></th>
+      <th><input type="button" class = "button2" value="S" onmousedown="cmmd_norm('s');" onmouseup="cmmd_N(false);"/></th>
+      <th><input type="button" class = "button2" value="D" onmousedown="cmmd_norm('d');" onmouseup="cmmd_N(false);"/></th>
     </tr>
   </table>
 </body>
@@ -139,34 +139,9 @@ const char index_str[] = R"=====(
 	  }
 	}
   
-	function cmmd_Q(){
-	  cmmd='q';
+	function cmmd_norm(cmmd_in){
+	  cmmd=cmmd_in;
 	  parent_wssend(cmmd+","+speed);
-	}
-	
-	function cmmd_W(){
-	  cmmd='w';
-	  parent_wssend(cmmd+","+speed);
-	}
-	
-	function cmmd_E(){
-	  cmmd='e';
-	  parent_wssend(cmmd+","+speed);
-	}
-	
-	function cmmd_A(){
-	  cmmd='a';
-	  parent_wssend(cmmd+","+speed);
-	}
-	
-	function cmmd_S(){
-	 	cmmd='s';
-	 	parent_wssend(cmmd+","+speed);
-	}
-	
-	function cmmd_D(){
-		cmmd='d';
-		parent_wssend(cmmd+","+speed);
 	}
 	
 	var key_det = 0;
@@ -176,13 +151,13 @@ const char index_str[] = R"=====(
 	    
 	    if(key_det === 0){
 	  		key_det = 1;
-		    if (keyName === 'q')		    cmmd_Q();
-		    else if (keyName === 'w')	  cmmd_W();
-		    else if (keyName === 'e') 	cmmd_E();
-		    else if (keyName === 'a') 	cmmd_A();
-		    else if (keyName === 's') 	cmmd_S();
-		    else if (keyName === 'd') 	cmmd_D();
-		    else if (keyName === 'n')   cmmd_N(true);
+		    if (keyName === 'q')		cmmd_norm('q');
+		    else if (keyName === 'w')	cmmd_norm('w');
+		    else if (keyName === 'e') 	cmmd_norm('e');
+		    else if (keyName === 'a') 	cmmd_norm('a');
+		    else if (keyName === 's') 	cmmd_norm('s');
+		    else if (keyName === 'd') 	cmmd_norm('d');
+		    else if (keyName === 'n')   cmmd_N(true);//強制停止
 		  }
     });
     
