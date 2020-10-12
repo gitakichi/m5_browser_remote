@@ -99,6 +99,7 @@ const char index_str[] = R"=====(
 		change();
 	}
 	
+	var cmmd='n';
 	var speed = Number(document.getElementById("speed").value).toString(16);
 	
 	var ws = new WebSocket('ws://' + window.location.hostname + ':81/');
@@ -109,54 +110,64 @@ const char index_str[] = R"=====(
 	}
 	
 	function parent_wssend(message){
-    if(ws.readyState == 1){
-      ws.send(message);
-    }
-    else{
-      var ws_status_msg = document.getElementById("ws_status_msg");
-      ws_status_msg.innerHTML = "サーバとの通信が切断されました。再読み込みしてください。";
-    }
-  }
+	    console.log(cmmd+","+speed);
+	    
+	    if(ws.readyState == 1){
+	      ws.send(message);
+	    }
+	    else{
+	      var ws_status_msg = document.getElementById("ws_status_msg");
+	      ws_status_msg.innerHTML = "サーバとの通信が切断されました。再読み込みしてください。";
+	    }
+	  }
 	
 	function speed_change(){
 	    speed = Number(document.getElementById("speed").value).toString(16);
 	    //console.log(speed);
+	    parent_wssend(cmmd+","+speed);
 	}
 	
 	function change(){
 	    touchscreen = document.getElementById('check').checked;
 	    //console.log("changed");
+	    parent_wssend(cmmd+","+speed);
 	}
 
 	function cmmd_N(force){
 	  if(touchscreen == false || force == true){
-	    parent_wssend("n"+","+speed);
+	    cmmd='n';
+	    parent_wssend(cmmd+","+speed);
 	  }
 	}
   
 	function cmmd_Q(){
-	  //console.log("q"+","+speed);
-	  parent_wssend("q"+","+speed);
+	  cmmd='q';
+	  parent_wssend(cmmd+","+speed);
 	}
 	
 	function cmmd_W(){
-	  parent_wssend("w"+","+speed);
+	  cmmd='w';
+	  parent_wssend(cmmd+","+speed);
 	}
 	
 	function cmmd_E(){
-	  parent_wssend("e"+","+speed);
+	  cmmd='e';
+	  parent_wssend(cmmd+","+speed);
 	}
 	
 	function cmmd_A(){
-	  parent_wssend("a"+","+speed);
+	  cmmd='a';
+	  parent_wssend(cmmd+","+speed);
 	}
 	
 	function cmmd_S(){
-	 	parent_wssend("s"+","+speed);
+	 	cmmd='s';
+	 	parent_wssend(cmmd+","+speed);
 	}
 	
 	function cmmd_D(){
-	  parent_wssend("d"+","+speed);
+		cmmd='d';
+		parent_wssend(cmmd+","+speed);
 	}
 	
 	var key_det = 0;
