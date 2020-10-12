@@ -51,15 +51,22 @@ void drv8830_neutral(void);
 uint8_t prev_btn_a = BTN_OFF;
 uint8_t btn_a      = BTN_OFF;
 
+const char* esp_ssid = "ESP32";
+const char* esp_pass = "11111111";
+
 void setup(void) {
   pinMode(LED_PIN,OUTPUT);
   pinMode(BTN_A_PIN,INPUT_PULLUP);
   digitalWrite(LED_PIN,LED_OFF);
   Serial.begin(115200);
+  //softap mode
+  WiFi.softAP(esp_ssid,esp_pass);
+  IPAddress self_ip = WiFi.softAPIP();
+  /*
+  //client mode
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   Serial.println("");
-
   // Wait for connection
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -68,18 +75,18 @@ void setup(void) {
   Serial.println("");
   Serial.print("Connected to ");
   Serial.println(ssid);
+  IPAddress self_ip = WiFi.localIP();
+  */
   Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-
+  Serial.println(self_ip);
+  
   M5.begin();
   M5.Axp.ScreenBreath(9); 
   //M5.Lcd.setRotation(1);// 0-3で画面の向き
   //M5.Lcd.setTextSize(2);
   M5.Lcd.setCursor(0, 0);
-  M5.Lcd.println(WiFi.localIP());
-  IPAddress ip=WiFi.localIP();
-  String ipStr = "http://" + String(ip[0]) + '.' + String(ip[1]) + '.' + String(ip[2]) + '.' + String(ip[3])+ '/';
-  //Serial.println(ipStr);
+  String ipStr = "http://" + String(self_ip[0]) + '.' + String(self_ip[1]) + '.' + String(self_ip[2]) + '.' + String(self_ip[3])+ '/';
+  M5.Lcd.println(self_ip);//http://192.168.4.1/の形式で表示
   M5.Lcd.qrcode(ipStr,0, 45, 80, 2);
 
   server.on("/", handle_remote);
@@ -151,7 +158,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
       //webSocket.sendTXT(num, "Connected");
       break;
     }
-    case WStype_TEXT:{//ここでデバッグする
+    case WStype_TEXT:{
       Serial.printf("[%u] get Text: %s\n", num, payload);//debug
       int load_len = sizeof(payload);//sizeof("n,2\n") == 4
       
