@@ -72,10 +72,15 @@ void setup(void) {
   Serial.println(WiFi.localIP());
 
   M5.begin();
-  M5.Lcd.setRotation(1);// 0-3で画面の向き
-  M5.Lcd.setTextSize(2);
+  M5.Axp.ScreenBreath(9); 
+  //M5.Lcd.setRotation(1);// 0-3で画面の向き
+  //M5.Lcd.setTextSize(2);
   M5.Lcd.setCursor(0, 0);
   M5.Lcd.println(WiFi.localIP());
+  IPAddress ip=WiFi.localIP();
+  String ipStr = "http://" + String(ip[0]) + '.' + String(ip[1]) + '.' + String(ip[2]) + '.' + String(ip[3])+ '/';
+  //Serial.println(ipStr);
+  M5.Lcd.qrcode(ipStr,0, 45, 80, 2);
 
   server.on("/", handle_remote);
   server.onNotFound(handleNotFound);
