@@ -1,11 +1,10 @@
 #include <WiFi.h>
 #include <WebServer.h>
+#include <DNSServer.h>
 #include <WebSocketsServer.h>
 #include <M5StickC.h>
 #include <Wire.h>
-#include "secret.h"
 #include "index.h"
-#include <DNSServer.h>
 
 //for DRV8830
 #define DRV8830_A 0x60//右モーター
@@ -16,11 +15,7 @@
 #define DIR_CW    0x01
 #define DIR_CCW   0x02
 #define DIR_B     0x03
-#define SPEED_0 0x06
-
-//Wifi認証情報はsecret.hに記載
-//const char* ssid = "........";
-//const char* password = "........";
+#define SPEED_0   0x06
 
 //for M5StickC
 #define BTN_A_PIN 37
@@ -30,12 +25,8 @@
 #define BTN_ON    LOW
 #define BTN_OFF   HIGH
 
-WebServer server(80);
-WebSocketsServer webSocket = WebSocketsServer(81);
-//環境設定->コンパイラの警告->初期値
-
 //void handleRoot(void);
-void handleRC(void);
+void handle_remote(void);
 void handleNotFound(void);
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length);
 void drv8830_setup(void);
@@ -49,15 +40,16 @@ void drv8830_D(char m_speed);
 void drv8830_neutral(void);
 
 //Global variable
+WebServer server(80);
+IPAddress ip;
+DNSServer dnsServer;
+WebSocketsServer webSocket = WebSocketsServer(81);
+//環境設定->コンパイラの警告->初期値
+
 uint8_t prev_btn_a = BTN_OFF;
 uint8_t btn_a      = BTN_OFF;
-
-const byte DNS_PORT = 53;
-DNSServer dnsServer;
 const char* esp_ssid = "ESP32";
 const char* esp_pass = "11111111";//WIFI:S:ESP32;T:WPA;P:11111111;;この文字列でWifiに接続できる
-
-IPAddress ip;
 
 void setup(void) {
   pinMode(LED_PIN,OUTPUT);
@@ -67,22 +59,7 @@ void setup(void) {
   //softap mode
   WiFi.softAP(esp_ssid,esp_pass);
   ip = WiFi.softAPIP();
-  dnsServer.start(DNS_PORT, "*", ip);
-  /*
-  //client mode
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  Serial.println("");
-  // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.print("Connected to ");
-  Serial.println(ssid);
-  IPAddress self_ip = WiFi.localIP();
-  */
+  dnsServer.start(53, "*", ip);
   Serial.print("IP address: ");
   Serial.println(ip);
   
@@ -94,8 +71,6 @@ void setup(void) {
   M5.Lcd.println("SSID:"+String(esp_ssid));
   M5.Lcd.println("PASS:"+String(esp_pass));
   M5.Lcd.println(ip);
-  
-  //M5.Lcd.qrcode(ipStr,0, 45, 80, 2);
   M5.Lcd.qrcode("WIFI:S:"+String(esp_ssid)+";T:WPA;P:"+String(esp_pass)+";;",0, 45, 80, 2);
 
   server.on("/", handle_remote);
@@ -140,25 +115,8 @@ void handle_remote(void) {
 void handleNotFound(void) {
   String ipStr = "http://" + String(ip[0]) + '.' + String(ip[1]) + '.' + String(ip[2]) + '.' + String(ip[3])+ '/';
   server.sendHeader("Location", ipStr, true);
-  server.send(302, "text/plain", "");
-  server.client().stop();
-  
-  /*
-  digitalWrite(LED_PIN,LED_ON);
-  String message = "File Not Found\n\n";
-  message += "URI: ";
-  message += server.uri();
-  message += "\nMethod: ";
-  message += (server.method() == HTTP_GET) ? "GET" : "POST";
-  message += "\nArguments: ";
-  message += server.args();
-  message += "\n";
-  for (uint8_t i = 0; i < server.args(); i++) {
-    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
-  }
-  server.send(404, "text/plain", message);
-  digitalWrite(LED_PIN,LED_OFF);
-  */
+  server.send(302, "text/plain", "");// Empty content inhibits Content-length header so we have to close the socket ourselves.
+  server.client().stop();// Stop is needed because we sent no content length
 }
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
@@ -217,8 +175,6 @@ void drv8830_setup(void){
   Wire.write(FAULT);//フォルト(障害状態)
   Wire.write(0x80);//フォルトクリア
   Wire.endTransmission();//I2Cスレーブ「Arduino Uno」のデータ送信終了
-
-  delay(1000);//1000msec待機(1秒待機);
 }
 
 void drv8830_func(char m_speed,char device,char dir){
