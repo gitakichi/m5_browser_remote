@@ -68,8 +68,8 @@ void setup(void) {
   //M5.Lcd.setRotation(1);// 0-3で画面の向き
   //M5.Lcd.setTextSize(2);
   M5.Lcd.setCursor(0, 0);
-  M5.Lcd.println("SSID:"+String(esp_ssid));
-  M5.Lcd.println("PASS:"+String(esp_pass));
+  M5.Lcd.println("ID:"+String(esp_ssid));
+  M5.Lcd.println("PW:"+String(esp_pass));
   M5.Lcd.println(ip);
   M5.Lcd.qrcode("WIFI:S:"+String(esp_ssid)+";T:WPA;P:"+String(esp_pass)+";;",0, 45, 80, 2);
 
