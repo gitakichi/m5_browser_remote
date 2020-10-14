@@ -5,6 +5,7 @@
 #include <Wire.h>
 #include "secret.h"
 #include "index.h"
+#include <DNSServer.h>
 
 //for DRV8830
 #define DRV8830_A 0x60//右モーター
@@ -51,8 +52,12 @@ void drv8830_neutral(void);
 uint8_t prev_btn_a = BTN_OFF;
 uint8_t btn_a      = BTN_OFF;
 
+const byte DNS_PORT = 53;
+DNSServer dnsServer;
 const char* esp_ssid = "ESP32";
-const char* esp_pass = "11111111";
+const char* esp_pass = "11111111";//WIFI:S:ESP32;T:WPA;P:11111111;;この文字列でWifiに接続できる
+
+IPAddress ip;
 
 void setup(void) {
   pinMode(LED_PIN,OUTPUT);
@@ -61,7 +66,8 @@ void setup(void) {
   Serial.begin(115200);
   //softap mode
   WiFi.softAP(esp_ssid,esp_pass);
-  IPAddress self_ip = WiFi.softAPIP();
+  ip = WiFi.softAPIP();
+  dnsServer.start(DNS_PORT, "*", ip);
   /*
   //client mode
   WiFi.mode(WIFI_STA);
@@ -78,16 +84,19 @@ void setup(void) {
   IPAddress self_ip = WiFi.localIP();
   */
   Serial.print("IP address: ");
-  Serial.println(self_ip);
+  Serial.println(ip);
   
   M5.begin();
-  M5.Axp.ScreenBreath(9); 
+  M5.Axp.ScreenBreath(8); 
   //M5.Lcd.setRotation(1);// 0-3で画面の向き
   //M5.Lcd.setTextSize(2);
   M5.Lcd.setCursor(0, 0);
-  String ipStr = "http://" + String(self_ip[0]) + '.' + String(self_ip[1]) + '.' + String(self_ip[2]) + '.' + String(self_ip[3])+ '/';
-  M5.Lcd.println(self_ip);//http://192.168.4.1/の形式で表示
-  M5.Lcd.qrcode(ipStr,0, 45, 80, 2);
+  M5.Lcd.println("SSID:"+String(esp_ssid));
+  M5.Lcd.println("PASS:"+String(esp_pass));
+  M5.Lcd.println(ip);
+  
+  //M5.Lcd.qrcode(ipStr,0, 45, 80, 2);
+  M5.Lcd.qrcode("WIFI:S:"+String(esp_ssid)+";T:WPA;P:"+String(esp_pass)+";;",0, 45, 80, 2);
 
   server.on("/", handle_remote);
   server.onNotFound(handleNotFound);
@@ -102,6 +111,7 @@ void setup(void) {
 
 void loop(void) {
   webSocket.loop();
+  dnsServer.processNextRequest();
   server.handleClient();
 
   btn_a = digitalRead(BTN_A_PIN);
@@ -128,6 +138,12 @@ void handle_remote(void) {
 }
 
 void handleNotFound(void) {
+  String ipStr = "http://" + String(ip[0]) + '.' + String(ip[1]) + '.' + String(ip[2]) + '.' + String(ip[3])+ '/';
+  server.sendHeader("Location", ipStr, true);
+  server.send(302, "text/plain", "");
+  server.client().stop();
+  
+  /*
   digitalWrite(LED_PIN,LED_ON);
   String message = "File Not Found\n\n";
   message += "URI: ";
@@ -142,6 +158,7 @@ void handleNotFound(void) {
   }
   server.send(404, "text/plain", message);
   digitalWrite(LED_PIN,LED_OFF);
+  */
 }
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
