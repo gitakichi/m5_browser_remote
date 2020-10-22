@@ -2,6 +2,7 @@
 #include <WebServer.h>
 #include <DNSServer.h>
 #include <WebSocketsServer.h>
+#include <BluetoothSerial.h>//partical scheme->No OTA
 #include <M5StickC.h>
 #include <Wire.h>
 #include "index.h"
@@ -29,6 +30,8 @@
 void handle_remote(void);
 void handleNotFound(void);
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length);
+void uart_ctrl(void);
+void bt_ctrl(void);
 void ctrl(char *payload);
 void drv8830_setup(void);
 void drv8830_func(char m_speed,char device,char dir);
@@ -46,6 +49,7 @@ IPAddress ip;
 DNSServer dnsServer;
 WebSocketsServer webSocket = WebSocketsServer(81);
 //環境設定->コンパイラの警告->初期値
+BluetoothSerial SerialBT;
 
 uint8_t prev_btn_a = BTN_OFF;
 uint8_t btn_a      = BTN_OFF;
@@ -57,6 +61,7 @@ void setup(void) {
   pinMode(BTN_A_PIN,INPUT_PULLUP);
   digitalWrite(LED_PIN,LED_OFF);
   Serial.begin(115200);
+  SerialBT.begin("ESP32");
   //softap mode
   WiFi.softAP(esp_ssid,esp_pass);
   ip = WiFi.softAPIP();
@@ -86,23 +91,12 @@ void setup(void) {
 }
 
 void loop(void) {
-  static char uart_buf[16];
-  static int buf_i = 0;
-  
   webSocket.loop();
   dnsServer.processNextRequest();
   server.handleClient();
 
-  if (Serial.available()) { // 受信したデータが存在する
-    uart_buf[buf_i] = Serial.read(); // 受信データを読み込む
-    if(uart_buf[buf_i] == '\n'){//取り合えずEnterすると先頭に戻る       
-      uart_buf[buf_i] = 0;
-      buf_i = 0;
-      ctrl(uart_buf);
-    }
-    else if(buf_i < 15) buf_i++;
-    else buf_i = 0;
-  }
+  uart_ctrl();
+  bt_ctrl();
   
   btn_a = digitalRead(BTN_A_PIN);
   if(prev_btn_a == BTN_OFF && btn_a == BTN_ON){
@@ -153,6 +147,40 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
       ctrl((char*)payload);
       break;
     }
+  }
+}
+
+void uart_ctrl(void){
+  static char uart_buf[16];
+  static int buf_i = 0;
+  
+  if (Serial.available()) { // 受信したデータが存在する
+    uart_buf[buf_i] = Serial.read(); // 受信データを読み込む
+    Serial.print(uart_buf[buf_i]);//com4とcom5が出てくるけどcom4しか使えない
+    if(uart_buf[buf_i] == '\n'){//取り合えずEnterすると先頭に戻る       
+      uart_buf[buf_i] = 0;
+      buf_i = 0;
+      ctrl(uart_buf);
+    }
+    else if(buf_i < 15) buf_i++;
+    else buf_i = 0;
+  } 
+}
+
+void bt_ctrl(void){
+  static char uart_buf[16];
+  static int buf_i = 0;
+  
+  if (SerialBT.available()) { // 受信したデータが存在する
+    uart_buf[buf_i] = SerialBT.read(); // 受信データを読み込む
+    SerialBT.print(uart_buf[buf_i]);//com4とcom5が出てくるけどcom4しか使えない
+    if(uart_buf[buf_i] == '\n'){//取り合えずEnterすると先頭に戻る       
+      uart_buf[buf_i] = 0;
+      buf_i = 0;
+      ctrl(uart_buf);
+    }
+    else if(buf_i < 15) buf_i++;
+    else buf_i = 0;
   }
 }
 
