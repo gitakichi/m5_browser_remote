@@ -12,8 +12,8 @@
 #define CONTROL   0x00
 #define FAULT     0x01
 #define DIR_N     0x00
-#define DIR_CW    0x01
-#define DIR_CCW   0x02
+#define DIR_CCW   0x01
+#define DIR_CW    0x02
 #define DIR_B     0x03
 #define SPEED_0   0x06
 
@@ -29,6 +29,7 @@
 void handle_remote(void);
 void handleNotFound(void);
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length);
+void ctrl(char *payload);
 void drv8830_setup(void);
 void drv8830_func(char m_speed,char device,char dir);
 void drv8830_Q(char m_speed);
@@ -85,10 +86,24 @@ void setup(void) {
 }
 
 void loop(void) {
+  static char uart_buf[16];
+  static int buf_i = 0;
+  
   webSocket.loop();
   dnsServer.processNextRequest();
   server.handleClient();
 
+  if (Serial.available()) { // 受信したデータが存在する
+    uart_buf[buf_i] = Serial.read(); // 受信データを読み込む
+    if(uart_buf[buf_i] == '\n'){//取り合えずEnterすると先頭に戻る       
+      uart_buf[buf_i] = 0;
+      buf_i = 0;
+      ctrl(uart_buf);
+    }
+    else if(buf_i < 15) buf_i++;
+    else buf_i = 0;
+  }
+  
   btn_a = digitalRead(BTN_A_PIN);
   if(prev_btn_a == BTN_OFF && btn_a == BTN_ON){
     drv8830_neutral();
@@ -135,28 +150,32 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
     }
     case WStype_TEXT:{
       Serial.printf("[%u] get Text: %s\n", num, payload);//debug
-      int load_len = sizeof(payload);//sizeof("n,2\n") == 4
-      
-      if(load_len == 4){     
-        char raw_speed;
-        if(payload[2]>='0' && payload[2]<='9')       raw_speed = payload[2]-'0';
-        else if(payload[2]>='a' && payload[2]<='f')  raw_speed = payload[2]-'a'+0x0A;
-        else if(payload[2]>='A' && payload[2]<='F')  raw_speed = payload[2]-'A'+0x0A;
-        
-        char m_speed = raw_speed + SPEED_0;
-        //Serial.print("0x");
-        //Serial.println(m_speed,HEX);
-      
-        if(payload[0] == 'q')       drv8830_Q(m_speed);
-        else if(payload[0] == 'w')  drv8830_W(m_speed);
-        else if(payload[0] == 'e')  drv8830_E(m_speed);
-        else if(payload[0] == 'a')  drv8830_A(m_speed);
-        else if(payload[0] == 's')  drv8830_S(m_speed);
-        else if(payload[0] == 'd')  drv8830_D(m_speed);
-        else if(payload[0] == 'n')  drv8830_neutral();
-      }
+      ctrl((char*)payload);
       break;
     }
+  }
+}
+
+void ctrl(char *payload){
+  int load_len = sizeof(payload);//sizeof("n,2\n") == 4
+      
+  if(load_len >= 3){     
+    char raw_speed;
+    if(payload[2]>='0' && payload[2]<='9')       raw_speed = payload[2]-'0';
+    else if(payload[2]>='a' && payload[2]<='f')  raw_speed = payload[2]-'a'+0x0A;
+    else if(payload[2]>='A' && payload[2]<='F')  raw_speed = payload[2]-'A'+0x0A;
+    
+    char m_speed = raw_speed + SPEED_0;
+    //Serial.print("0x");
+    //Serial.println(m_speed,HEX);
+  
+    if(payload[0] == 'q')       drv8830_Q(m_speed);
+    else if(payload[0] == 'w')  drv8830_W(m_speed);
+    else if(payload[0] == 'e')  drv8830_E(m_speed);
+    else if(payload[0] == 'a')  drv8830_A(m_speed);
+    else if(payload[0] == 's')  drv8830_S(m_speed);
+    else if(payload[0] == 'd')  drv8830_D(m_speed);
+    else if(payload[0] == 'n')  drv8830_neutral();
   }
 }
 
